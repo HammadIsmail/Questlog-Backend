@@ -108,3 +108,32 @@ async def shift_schedule(
     )
     await db.commit()
     return [ScheduleItemOut.model_validate(i) for i in updated]
+
+
+class RescheduleRequest(BaseModel):
+    start_time: datetime
+    end_time: datetime
+
+
+@router.post("/{item_id}/reschedule", response_model=ScheduleItemOut)
+async def reschedule_item(
+    item_id: uuid.UUID,
+    data: RescheduleRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reschedule a specific schedule item to a new start and end time (TRD §6)."""
+    result = await db.execute(
+        select(ScheduleItem).where(
+            and_(ScheduleItem.id == item_id, ScheduleItem.user_id == current_user.id)
+        )
+    )
+    item = result.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Schedule item not found")
+
+    item.start_time = data.start_time
+    item.end_time = data.end_time
+    await db.flush()
+    return ScheduleItemOut.model_validate(item)
+

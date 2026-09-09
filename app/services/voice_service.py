@@ -119,7 +119,8 @@ async def execute_voice_tool(
                     "title": item.title,
                     "start": item.start_time.strftime("%H:%M"),
                     "end": item.end_time.strftime("%H:%M") if item.end_time else None,
-                    "is_completed": item.is_completed,
+                    "is_completed": item.status == "completed",
+                    "status": item.status,
                 }
                 for item in items
             ]

@@ -37,3 +37,28 @@ async def analytics_day(
 ):
     d = target_date or date.today()
     return await get_daily_analytics(db, current_user.id, d)
+
+
+@router.get("/apps")
+async def analytics_apps(
+    target_date: Optional[date] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Fetch top used applications and duration (TRD §6)."""
+    d = target_date or date.today()
+    data = await get_daily_analytics(db, current_user.id, d)
+    return data.get("top_apps", [])
+
+
+@router.get("/websites")
+async def analytics_websites(
+    target_date: Optional[date] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Fetch top visited websites/domains and duration (TRD §6)."""
+    d = target_date or date.today()
+    data = await get_daily_analytics(db, current_user.id, d)
+    return data.get("top_websites", [])
+
