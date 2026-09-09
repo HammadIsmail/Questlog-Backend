@@ -4,6 +4,15 @@ A high-performance, asynchronous FastAPI backend that powers **Real-Life Dungeon
 
 ---
 
+## Related Repositories
+
+| Repository | Description |
+|---|---|
+| 🖥️ [Questlog-Desktop-App](https://github.com/HammadIsmail/Questlog-Desktop-App) | WPF Windows desktop client with Win32 telemetry |
+| 🧩 [Questlog-Chrome-Extension](https://github.com/HammadIsmail/Questlog-Chrome-Extension) | Manifest V3 browser extension for domain tracking |
+
+---
+
 ## Architecture & Features
 
 - **Asynchronous API Engine**: Built on FastAPI, Starlette, and async SQLAlchemy for non-blocking I/O.
