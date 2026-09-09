@@ -2,12 +2,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from app.config import settings
 
 
+engine_kwargs = {"echo": settings.is_development}
+if "sqlite" in settings.normalized_database_url:
+    from sqlalchemy.pool import StaticPool
+    engine_kwargs["poolclass"] = StaticPool
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+
 engine = create_async_engine(
     settings.normalized_database_url,
-    echo=settings.is_development,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    **engine_kwargs,
 )
 
 AsyncSessionLocal = async_sessionmaker(

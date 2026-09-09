@@ -18,7 +18,7 @@ class ActivityCreate(BaseModel):
 
 
 class ActivityBatchCreate(BaseModel):
-    activities: List[ActivityCreate]
+    activities: List[ActivityCreate] = Field(min_length=1)
 
 
 class ActivityUpdate(BaseModel):

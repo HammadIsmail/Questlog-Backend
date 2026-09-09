@@ -3,6 +3,7 @@ from datetime import datetime, timezone, date, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
@@ -80,3 +81,30 @@ async def generate_schedule(
     from app.agents.planner import generate_ai_schedule
     items = await generate_ai_schedule(db, current_user.id, data)
     return [ScheduleItemOut.model_validate(i) for i in items]
+
+
+class ShiftScheduleRequest(BaseModel):
+    item_id: uuid.UUID
+    overrun_minutes: int
+
+
+@router.post("/shift", response_model=List[ScheduleItemOut])
+async def shift_schedule(
+    data: ShiftScheduleRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Dynamic Schedule Shifting (PRD §8).
+    Slides all remaining incomplete blocks after the anchor item forward
+    by `overrun_minutes` without marking the day as failed.
+    """
+    from app.agents.schedule_shifter import shift_remaining_blocks
+    updated = await shift_remaining_blocks(
+        db=db,
+        user_id=current_user.id,
+        anchor_item_id=data.item_id,
+        overrun_minutes=data.overrun_minutes,
+    )
+    await db.commit()
+    return [ScheduleItemOut.model_validate(i) for i in updated]
