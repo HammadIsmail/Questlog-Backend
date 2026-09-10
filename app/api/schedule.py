@@ -80,6 +80,7 @@ async def generate_schedule(
     # Import here to avoid circular deps at module load
     from app.agents.planner import generate_ai_schedule
     items = await generate_ai_schedule(db, current_user.id, data)
+    await db.commit()
     return [ScheduleItemOut.model_validate(i) for i in items]
 
 

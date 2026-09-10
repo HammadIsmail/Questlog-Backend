@@ -39,7 +39,36 @@ async def generate_ai_schedule(
     goals = goals_result.scalars().all()
 
     if not goals:
-        return []
+        starter_goals = [
+            Goal(
+                user_id=user_id,
+                title="DSA & Problem Solving",
+                category="DSA",
+                priority="high",
+                target_duration_seconds=5400,
+                status="pending",
+            ),
+            Goal(
+                user_id=user_id,
+                title="Deep Work: Project Implementation",
+                category="Coding",
+                priority="critical",
+                target_duration_seconds=7200,
+                status="pending",
+            ),
+            Goal(
+                user_id=user_id,
+                title="Technical Research & Architecture Study",
+                category="Study",
+                priority="medium",
+                target_duration_seconds=3600,
+                status="pending",
+            ),
+        ]
+        for g in starter_goals:
+            db.add(g)
+        await db.flush()
+        goals = starter_goals
 
     # Try AI generation if an LLM key is configured
     if is_llm_available():
