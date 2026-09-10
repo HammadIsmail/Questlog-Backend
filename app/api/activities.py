@@ -2,7 +2,7 @@ import uuid
 from typing import List, Optional
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -28,11 +28,22 @@ async def ingest_activity(
 
 @router.post("/batch", response_model=List[ActivityOut], status_code=status.HTTP_201_CREATED)
 async def ingest_batch(
-    data: ActivityBatchCreate,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    import json as _json
+    body = await request.json()
+    print(f"[DEBUG batch] body keys: {list(body.keys()) if isinstance(body, dict) else type(body)}")
+    if isinstance(body, dict) and "activities" in body and body["activities"]:
+        print(f"[DEBUG batch] first activity keys: {list(body['activities'][0].keys())}")
+    try:
+        data = ActivityBatchCreate(**body)
+    except Exception as ve:
+        print(f"[DEBUG batch] validation error: {ve}")
+        raise HTTPException(status_code=422, detail=str(ve))
     return await create_activities_batch(db, current_user.id, data.activities)
+
 
 
 @router.get("/today", response_model=List[ActivityOut])

@@ -27,10 +27,7 @@ class ToolExecutionRequest(BaseModel):
 async def get_voice_token(
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Generate a short-lived AssemblyAI token for client audio streaming.
-    Keeps master AssemblyAI API key safe on backend.
-    """
+    """Generate a short-lived AssemblyAI token for client audio streaming."""
     token = await get_assemblyai_temp_token()
     if not token:
         raise HTTPException(

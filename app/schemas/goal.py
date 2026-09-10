@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class GoalCreate(BaseModel):
@@ -9,6 +9,7 @@ class GoalCreate(BaseModel):
     description: Optional[str] = None
     category: str = "Other"
     target_duration_seconds: int = Field(ge=0, default=0)
+    estimated_minutes: Optional[int] = None
     priority: str = "medium"
     scheduled_start: Optional[datetime] = None
     scheduled_end: Optional[datetime] = None
@@ -44,3 +45,13 @@ class GoalOut(BaseModel):
     date: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def estimated_minutes(self) -> int:
+        return (self.target_duration_seconds or 0) // 60
+
+    @computed_field
+    @property
+    def is_completed(self) -> bool:
+        return self.status == "completed"
