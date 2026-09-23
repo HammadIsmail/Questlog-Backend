@@ -50,6 +50,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint for platform verification & browser preview
+@app.get("/", tags=["root"])
+async def root():
+    return {
+        "status": "ok",
+        "service": "Real-Life Dungeon Master API",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": "/api/v1/health",
+    }
+
+
 # Register routers
 app.include_router(health_router)
 app.include_router(auth_router)
